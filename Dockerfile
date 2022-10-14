@@ -126,6 +126,8 @@ RUN set -eux \
 		--with-config-file-path="${PHP_INI_DIR}" \
 		--with-config-file-scan-dir="${PHP_INI_DIR}/conf.d" \
 		--disable-cgi \
+# apache perfork mod not available
+		–-enable-maintainer-zts \
 		--enable-safe-mode \
 		$(command -v apxs2 > /dev/null 2>&1 && echo '--with-apxs2=/usr/bin/apxs2' || true) \
 # --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)

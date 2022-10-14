@@ -618,7 +618,8 @@ https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/$(dpkg-architec
 	&& docker-php-ext-enable swoole \
 	&& rm -rf /tmp/* \
 	&& true 
-
+# fixed index.php	
+COPY dir.conf /etc/apache2/mods-enabled/dir.conf
 WORKDIR /var/www/html
 EXPOSE 80
 CMD ["apache2-foreground"]

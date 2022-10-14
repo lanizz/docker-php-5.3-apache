@@ -1,6 +1,5 @@
 FROM debian:jessie-slim
 
-
 ENV PHP_VERSION=5.3.29
 ENV PHP_INI_DIR=/usr/local/etc/php
 
@@ -229,74 +228,75 @@ COPY data/docker-php-* /usr/local/bin/
 COPY data/php-fpm.conf /usr/local/etc/
 COPY data/php.ini /usr/local/etc/php/php.ini
 
+ENV PHP_EXT_DEPS \
+	alien \
+	firebird-dev \
+	freetds-dev \
+	libaio-dev \
+	libbz2-dev \
+	libc-ares-dev \
+	libc-client-dev \
+	libcurl4-openssl-dev \
+	libenchant-dev \
+	libevent-dev \
+	libfbclient2 \
+	libfreetype6-dev \
+	libgmp-dev \
+	libib-util \
+	libicu-dev \
+	libjpeg-dev \
+	libkrb5-dev \
+	libldap2-dev \
+	libmcrypt-dev \
+	libmemcached-dev \
+	libmysqlclient-dev \
+	libnghttp2-dev \
+	libpcre3-dev \
+	libpng-dev \
+	libpq-dev \
+	libpspell-dev \
+	librabbitmq-dev \
+	librdkafka-dev \
+	libsasl2-dev \
+	libsnmp-dev \
+	libssl-dev \
+	libtidy-dev \
+	libvpx-dev \
+	libwebp-dev \
+	libxml2-dev \
+	libxpm-dev \
+	libxslt-dev \
+	libyaml-dev \
+	snmp \
+	uuid-dev \
+	zlib1g-dev \
+# Build tools
+	autoconf \
+	bison \
+	bisonc++ \
+	ca-certificates \
+	curl \
+	dpkg-dev \
+	file \
+	flex \
+	g++ \
+	gcc \
+	git \
+	lemon \
+	libc-client-dev \
+	libc-dev \
+	libcurl4-openssl-dev \
+	libssl-dev \
+	make \
+	patch \
+	pkg-config \
+	re2c \
+	xz-utils
 
 RUN set -eux \
 	&& DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --no-install-suggests \
-		alien \
-		firebird-dev \
-		freetds-dev \
-		libaio-dev \
-		libbz2-dev \
-		libc-ares-dev \
-		libc-client-dev \
-		libcurl4-openssl-dev \
-		libenchant-dev \
-		libevent-dev \
-		libfbclient2 \
-		libfreetype6-dev \
-		libgmp-dev \
-		libib-util \
-		libicu-dev \
-		libjpeg-dev \
-		libkrb5-dev \
-		libldap2-dev \
-		libmcrypt-dev \
-		libmemcached-dev \
-		libmysqlclient-dev \
-		libnghttp2-dev \
-		libpcre3-dev \
-		libpng-dev \
-		libpq-dev \
-		libpspell-dev \
-		librabbitmq-dev \
-		librdkafka-dev \
-		libsasl2-dev \
-		libsnmp-dev \
-		libssl-dev \
-		libtidy-dev \
-		libvpx-dev \
-		libwebp-dev \
-		libxml2-dev \
-		libxpm-dev \
-		libxslt-dev \
-		libyaml-dev \
-		snmp \
-		uuid-dev \
-		zlib1g-dev \
-# Build tools
-		autoconf \
-		bison \
-		bisonc++ \
-		ca-certificates \
-		curl \
-		dpkg-dev \
-		file \
-		flex \
-		g++ \
-		gcc \
-		git \
-		lemon \
-		libc-client-dev \
-		libc-dev \
-		libcurl4-openssl-dev \
-		libssl-dev \
-		make \
-		patch \
-		pkg-config \
-		re2c \
-		xz-utils \
-	&& rm -rf /var/lib/apt/lists/*
+		${PHP_EXT_DEPS}
 
 
 # Fix timezone (only required for testing to stop php -v and php-fpm -v from complaining to stderr)
@@ -876,7 +876,11 @@ RUN set -eux \
 	&& true 
 
 RUN set -eux \
-	&& rm -rf /tmp/*
+	&& rm -rf /tmp/* \	
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
+		${PHP_EXT_DEPS} \
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/* 
 
 WORKDIR /var/www/html
 

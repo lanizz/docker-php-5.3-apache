@@ -296,7 +296,9 @@ ENV PHP_EXT_DEPS \
 RUN set -eux \
 	&& DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --no-install-suggests \
-		${PHP_EXT_DEPS}
+		${PHP_EXT_DEPS} \
+	&& rm -rf /var/lib/apt/lists/* 
+		
 
 
 # Fix timezone (only required for testing to stop php -v and php-fpm -v from complaining to stderr)
@@ -876,11 +878,16 @@ RUN set -eux \
 	&& true 
 
 RUN set -eux \
-	&& rm -rf /tmp/* \	
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false \
-		${PHP_EXT_DEPS} \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/* 
+	&& rm -rf /tmp/*
+
+COPY ZendGuardLoader.so ${PHP_INI_DIR}/ZendGuardLoader.so
+
+RUN set -eux \
+	&& echo "[Zend.loader]" >>  ${PHP_INI_DIR}/php.ini \ 
+	&& echo "zend_extension=${PHP_INI_DIR}/ZendGuardLoader.so" >>  ${PHP_INI_DIR}/php.ini \ 
+	&& echo "zend_loader.enable=1" >>  ${PHP_INI_DIR}/php.ini \ 
+	&& echo "zend_loader.disable_licensing=1" >>  ${PHP_INI_DIR}/php.ini \ 
+	&& echo "zend_loader.obfuscation_level_support=3" >>  ${PHP_INI_DIR}/php.ini
 
 WORKDIR /var/www/html
 

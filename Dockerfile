@@ -70,6 +70,7 @@ RUN set -eux \
 	&& rm -rf /var/lib/apt/lists/* \
 # Setup PHP directories	
 	&& mkdir -p ${PHP_INI_DIR}/conf.d \
+	&& mkdir -p ${PHP_INI_DIR}/extra.d \
 	&& mkdir -p /usr/src/php
 
 # Install Apache
@@ -99,6 +100,7 @@ COPY data/docker-php-* /usr/local/bin/
 # COPY data/php-fpm.conf /usr/local/etc/
 COPY data/php.ini ${PHP_INI_DIR}/php.ini
 COPY ZendGuardLoader.so ${PHP_INI_DIR}/ZendGuardLoader.so
+COPY dir.conf /etc/apache2/mods-enabled/dir.conf
 ###
 ### Build PHP
 ###
@@ -181,22 +183,8 @@ RUN set -eux \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
 # Setup extension dir
-	&& mkdir -p "$(php -r 'echo ini_get("extension_dir");')" \	
-	&& echo "[Zend.loader]" >> ${PHP_INI_DIR}/php.ini \ 
-	&& echo "zend_extension=${PHP_INI_DIR}/ZendGuardLoader.so" >> ${PHP_INI_DIR}/php.ini \ 
-	&& echo "zend_loader.enable=1" >> ${PHP_INI_DIR}/php.ini \ 
-	&& echo "zend_loader.disable_licensing=1" >> ${PHP_INI_DIR}/php.ini \ 
-	&& echo "zend_loader.obfuscation_level_support=3" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "[xdebug]" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.start_with_request=yes" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.remote_enable=1" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.remote_port=9001" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.remote_host=host.docker.internal" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.idekey=PHPSTORM" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.remote_log=/var/log/xdebug.log" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.mode=debug" >> ${PHP_INI_DIR}/php.ini \
-	&& echo "xdebug.remote_connect_back=1" >> ${PHP_INI_DIR}/php.ini 
-
+	&& mkdir -p "$(php -r 'echo ini_get("extension_dir");')" 
+	
 RUN set -eux \
 	&& DEBIAN_FRONTEND=noninteractive apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --no-install-suggests \
@@ -584,7 +572,7 @@ https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/$(dpkg-architec
 	# Installation: Version specific
 	# Type:         PECL extension
 	# Default:      Pecl command
-	&& pecl install xdebug-2.0.5 \
+	&& pecl install xdebug-2.2.7 \
 	# Enabling
 	&& docker-php-ext-enable xdebug \
 # -------------------- Installing PHP Extension: xmlrpc --------------------
@@ -621,7 +609,7 @@ https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/$(dpkg-architec
 	&& rm -rf /tmp/* \
 	&& true 
 # fixed index.php	
-COPY dir.conf /etc/apache2/mods-enabled/dir.conf
+
 WORKDIR /var/www/html
 EXPOSE 80
 CMD ["apache2-foreground"]
